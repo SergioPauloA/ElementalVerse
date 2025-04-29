@@ -343,13 +343,93 @@ const ElementDetails = ({ element, onClose }) => {
                       <div 
                         key={i} 
                         className={`abundance-unit ${
-                          (element.number <= 20 && i < 7) ||
-                          (element.symbol === 'Fe' && i < 9) ||
-                          (element.symbol === 'O' && i < 10) ||
-                          (element.symbol === 'Si' && i < 8) ||
-                          (element.symbol === 'Al' && i < 8) ||
-                          i < 3 ? 'active' : ''
-                        }`}
+                          // Elementos mais abundantes na crosta terrestre
+                          (element.symbol === 'O' && i < 10) || // Oxigênio (46.6%)
+                          (element.symbol === 'Si' && i < 8) || // Silício (27.7%)
+                          (element.symbol === 'Al' && i < 7) || // Alumínio (8.1%)
+                          (element.symbol === 'Fe' && i < 6) || // Ferro (5.0%)
+                          (element.symbol === 'Ca' && i < 5) || // Cálcio (3.6%)
+                          (element.symbol === 'Na' && i < 4) || // Sódio (2.8%)
+                          (element.symbol === 'K' && i < 4) || // Potássio (2.6%)
+                          (element.symbol === 'Mg' && i < 5) || // Magnésio (2.1%)
+                          (element.symbol === 'Ti' && i < 3) || // Titânio (0.44%)
+                          (element.symbol === 'H' && i < 3) || // Hidrogênio (0.14%)
+                          (element.symbol === 'P' && i < 3) || // Fósforo (0.12%)
+                          (element.symbol === 'Mn' && i < 2) || // Manganês (0.10%)
+                          (element.symbol === 'F' && i < 2) || // Flúor (0.08%)
+                          (element.symbol === 'Ba' && i < 2) || // Bário (0.04%)
+                          (element.symbol === 'Sr' && i < 2) || // Estrôncio (0.04%)
+                          (element.symbol === 'S' && i < 2) || // Enxofre (0.03%)
+                          (element.symbol === 'C' && i < 2) || // Carbono (0.02%)
+                          (element.symbol === 'Zr' && i < 2) || // Zircônio (0.02%)
+                          (element.symbol === 'V' && i < 2) || // Vanádio (0.02%)
+                          (element.symbol === 'Cl' && i < 2) || // Cloro (0.02%)
+                          (element.symbol === 'Cr' && i < 2) || // Cromo (0.01%)
+                          (element.symbol === 'Rb' && i < 1) || // Rubídio (0.006%)
+                          (element.symbol === 'Ni' && i < 1) || // Níquel (0.006%)
+                          (element.symbol === 'Zn' && i < 1) || // Zinco (0.005%)
+                          (element.symbol === 'Ce' && i < 1) || // Cério (0.005%)
+                          (element.symbol === 'Cu' && i < 1) || // Cobre (0.005%)
+                          (element.symbol === 'Nd' && i < 1) || // Neodímio (0.003%)
+                          (element.symbol === 'La' && i < 1) || // Lantânio (0.003%)
+                          (element.symbol === 'Y' && i < 1) || // Ítrio (0.003%)
+                          (element.symbol === 'Co' && i < 1) || // Cobalto (0.002%)
+                          (element.symbol === 'Sc' && i < 1) || // Escândio (0.002%)
+                          (element.symbol === 'Li' && i < 1) || // Lítio (0.002%)
+                          (element.symbol === 'N' && i < 1) || // Nitrogênio (0.002%)
+                          (element.symbol === 'Nb' && i < 1) || // Nióbio (0.002%)
+                          (element.symbol === 'Ga' && i < 1) || // Gálio (0.002%)
+                          (element.symbol === 'Pb' && i < 1) || // Chumbo (0.001%)
+                          (element.symbol === 'B' && i < 1) || // Boro (0.001%)
+                          (element.symbol === 'Pr' && i < 1) || // Praseodímio (0.0008%)
+                          (element.symbol === 'Sm' && i < 1) || // Samário (0.0006%)
+                          (element.symbol === 'Gd' && i < 1) || // Gadolínio (0.0006%)
+                          (element.symbol === 'Dy' && i < 1) || // Disprósio (0.0005%)
+                          (element.symbol === 'Er' && i < 1) || // Érbio (0.0004%)
+                          (element.symbol === 'Yb' && i < 1) || // Itérbio (0.0003%)
+                          (element.symbol === 'Hf' && i < 1) || // Háfnio (0.0003%)
+                          (element.symbol === 'Cs' && i < 1) || // Césio (0.0003%)
+                          (element.symbol === 'Be' && i < 1) || // Berílio (0.0003%)
+                          (element.symbol === 'U' && i < 1) || // Urânio (0.0003%)
+                          (element.symbol === 'Sn' && i < 1) || // Estanho (0.0002%)
+                          (element.symbol === 'As' && i < 1) || // Arsênio (0.0002%)
+                          (element.symbol === 'Mo' && i < 1) || // Molibdênio (0.0001%)
+
+                          // Elementos traços e muito raros (menos de 0.0001%)
+                          (element.symbol === 'W' && i < 0) || // Tungstênio
+                          (element.symbol === 'Cd' && i < 0) || // Cádmio
+                          (element.symbol === 'Sb' && i < 0) || // Antimônio
+                          (element.symbol === 'Bi' && i < 0) || // Bismuto
+                          (element.symbol === 'Hg' && i < 0) || // Mercúrio
+                          (element.symbol === 'Ag' && i < 0) || // Prata
+                          (element.symbol === 'Se' && i < 0) || // Selênio
+                          (element.symbol === 'I' && i < 0) || // Iodo
+                          (element.symbol === 'Au' && i < 0) || // Ouro
+                          (element.symbol === 'Pt' && i < 0) || // Platina
+
+                          // Gases nobres e elementos artificiais
+                          (element.symbol === 'He' && i < 1) || // Hélio (presente na atmosfera)
+                          (element.symbol === 'Ne' && i < 0) || // Neônio
+                          (element.symbol === 'Ar' && i < 2) || // Argônio (mais abundante na atmosfera)
+                          (element.symbol === 'Kr' && i < 0) || // Criptônio
+                          (element.symbol === 'Xe' && i < 0) || // Xenônio
+                          (element.symbol === 'Rn' && i < 0) || // Radônio
+
+                          // Elementos radioativos naturais
+                          (element.symbol === 'Th' && i < 1) || // Tório (0.0006%)
+                          (element.symbol === 'Ra' && i < 0) || // Rádio
+                          (element.symbol === 'Pa' && i < 0) || // Protactínio
+
+                          // Todos os elementos sintéticos (transurânicos e alguns outros)
+                          // são considerados com abundância zero
+                          ((element.number > 92 || 
+                            ['Tc', 'Pm', 'Po', 'At', 'Fr', 'Np', 'Pu', 'Am', 'Cm', 'Bk', 'Cf', 'Es', 
+                            'Fm', 'Md', 'No', 'Lr', 'Rf', 'Db', 'Sg', 'Bh', 'Hs', 'Mt', 'Ds', 'Rg', 
+                            'Cn', 'Nh', 'Fl', 'Mc', 'Lv', 'Ts', 'Og'].includes(element.symbol)) && i < 0) ||
+
+                          // Os demais elementos com baixíssima abundância recebem um valor mínimo
+                          i < 0 ? 'active' : ''
+                          }`}
                       ></div>
                     ))}
                   </div>
