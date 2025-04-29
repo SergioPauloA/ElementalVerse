@@ -390,7 +390,7 @@ const ElementDetails = ({ element, onClose }) => {
                       {electronShells.map((electrons, i) => (
                         <tr 
                           key={i}
-                          className={focusedShell === i ? 'highlighted-row' : ''}
+                          className={`shell-row ${focusedShell === i ? 'highlighted-row' : ''}`}
                           onMouseEnter={() => setFocusedShell(i)}
                           onMouseLeave={() => setFocusedShell(null)}
                         >
@@ -1836,11 +1836,29 @@ const App = () => {
 
         .shell-table {
           width: 100%;
-          border-collapse: collapse;
+          /* Alterado para separate para maior estabilidade */
+          border-collapse: separate;
+          border-spacing: 0;
           margin: 10px 0;
           background: rgba(0, 0, 0, 0.1);
           border-radius: 8px;
           overflow: hidden;
+          /* Evita reflow */
+          table-layout: fixed;
+        }
+
+        .shell-table th, 
+        .shell-table td {
+          padding: 10px 12px;
+          text-align: center;
+          /* Altura fixa para evitar ajustes de layout */
+          height: 20px;
+          line-height: 20px;
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          /* Evita quebra de linha e mantém consistência */
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
         }
 
         .shell-table th, 
@@ -1854,6 +1872,9 @@ const App = () => {
           background: rgba(25, 118, 210, 0.7);
           color: white;
           font-weight: 500;
+          /* Garante que o cabeçalho também tenha altura fixa */
+          height: 22px;
+          line-height: 22px;
         }
 
         .shell-table tr:nth-child(even) {
@@ -1933,8 +1954,11 @@ const App = () => {
           position: absolute;
           border: 1px solid rgba(255, 255, 255, 0.15);
           border-radius: 50%;
+          /* Garante que o orbital esteja EXATAMENTE no mesmo centro que o núcleo */
           top: 50%;
           left: 50%;
+          /* Mantenha a transformação 3D, mas garanta que o centro esteja correto */
+          transform-origin: center center;
           transform: translate(-50%, -50%) rotate3d(1, 1, 0, 60deg);
           animation: rotate3d linear infinite;
           box-shadow: 0 0 30px rgba(100, 181, 246, 0.2);
@@ -1952,8 +1976,11 @@ const App = () => {
           height: 12px;
           background: radial-gradient(circle at 30% 30%, #64b5f6, #1976d2);
           border-radius: 50%;
-          top: 0;
+          /* Posiciona exatamente na borda do orbital */
+          top: 50%;
           left: 0;
+          /* Centraliza o elétron em si mesmo */
+          transform: translate(-50%, -50%);
           box-shadow: 0 0 12px rgba(100, 181, 246, 1),
                       0 0 25px rgba(100, 181, 246, 0.6);
           animation: glow3D 2s infinite;
@@ -2397,12 +2424,21 @@ const App = () => {
         /* Tabela com destaque para a linha selecionada */
         .shell-table tr.highlighted-row {
           background: rgba(25, 118, 210, 0.2);
-          transition: background 0.3s ease;
+          /* Não muda tamanho nem padding - apenas cor de fundo */
+        }
+
+        .shell-table tr:hover:not(.highlighted-row) {
+          background: rgba(255, 255, 255, 0.07);
         }
 
         .shell-table tr {
           cursor: pointer;
-          transition: background 0.3s ease;
+          /* Transição suave apenas para a cor de fundo */
+          transition: background-color 0.3s ease;
+          /* Altura fixa para todas as linhas */
+          height: 42px;
+          /* Evita problemas de box-sizing */
+          box-sizing: border-box;
         }
 
         /* Animações aprimoradas */
