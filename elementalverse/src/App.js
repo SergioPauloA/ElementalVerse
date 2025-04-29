@@ -438,8 +438,8 @@ const ElementDetails = ({ element, onClose }) => {
               
               <h3>Aplicações</h3>
               <div className="applications">
-                {/* Aplicações dinâmicas baseadas no elemento */}
-                {element.symbol === 'H' && (
+               {/* Aplicações dinâmicas baseadas no elemento */}
+               {element.symbol === 'H' && (
                   <div className="application-item">
                     <div className="application-icon energy"></div>
                     <span>Combustível de Fusão</span>
@@ -479,6 +479,120 @@ const ElementDetails = ({ element, onClose }) => {
                   <div className="application-item">
                     <div className="application-icon biological"></div>
                     <span>Função Biológica</span>
+                  </div>
+                )}
+                {(element.symbol === 'He' || element.symbol === 'Ne' || element.symbol === 'Ar' || element.symbol === 'Kr' || element.symbol === 'Xe' || element.symbol === 'Rn') && (
+                  <div className="application-item">
+                    <div className="application-icon lighting"></div>
+                    <span>Iluminação e Lasers</span>
+                  </div>
+                )}
+                {(element.symbol === 'Li' || element.symbol === 'Co' || element.symbol === 'Ni') && (
+                  <div className="application-item">
+                    <div className="application-icon battery"></div>
+                    <span>Baterias</span>
+                  </div>
+                )}
+                {(element.symbol === 'C' || element.symbol === 'P' || element.symbol === 'S') && (
+                  <div className="application-item">
+                    <div className="application-icon organic"></div>
+                    <span>Química Orgânica</span>
+                  </div>
+                )}
+                {(element.symbol === 'F' || element.symbol === 'Br' || element.symbol === 'I') && (
+                  <div className="application-item">
+                    <div className="application-icon pharmaceutical"></div>
+                    <span>Farmacêutica</span>
+                  </div>
+                )}
+                {(element.symbol === 'Fe' || element.symbol === 'Al' || element.symbol === 'Cu' || element.symbol === 'Pb' || element.symbol === 'Zn' || element.symbol === 'Sn') && (
+                  <div className="application-item">
+                    <div className="application-icon construction"></div>
+                    <span>Construção Civil</span>
+                  </div>
+                )}
+                {(element.symbol === 'Y' || element.symbol === 'La' || element.symbol === 'Ce' || element.symbol === 'Nd' || element.symbol === 'Eu' || element.symbol === 'Tb' || element.symbol === 'Dy') && (
+                  <div className="application-item">
+                    <div className="application-icon magnet"></div>
+                    <span>Ímãs e Supercondutores</span>
+                  </div>
+                )}
+                {(element.symbol === 'Tc' || element.symbol === 'I' || element.symbol === 'Tl' || element.symbol === 'Gd') && (
+                  <div className="application-item">
+                    <div className="application-icon medical"></div>
+                    <span>Imagiologia Médica</span>
+                  </div>
+                )}
+                {(element.symbol === 'Hg' || element.symbol === 'Ga' || element.symbol === 'In') && (
+                  <div className="application-item">
+                    <div className="application-icon thermometer"></div>
+                    <span>Instrumentos de Medição</span>
+                  </div>
+                )}
+                {(element.symbol === 'Ti' || element.symbol === 'V' || element.symbol === 'Cr' || element.symbol === 'Mn' || element.symbol === 'Mo' || element.symbol === 'W') && (
+                  <div className="application-item">
+                    <div className="application-icon alloy"></div>
+                    <span>Ligas Especiais</span>
+                  </div>
+                )}
+                {(element.symbol === 'Mg' || element.symbol === 'Sr' || element.symbol === 'Ba') && (
+                  <div className="application-item">
+                    <div className="application-icon firework"></div>
+                    <span>Pirotecnia</span>
+                  </div>
+                )}
+                {(element.symbol === 'B' || element.symbol === 'Be' || element.symbol === 'Zr' || element.symbol === 'Hf') && (
+                  <div className="application-item">
+                    <div className="application-icon aerospace"></div>
+                    <span>Aeroespacial</span>
+                  </div>
+                )}
+                {(element.symbol === 'Cs' || element.symbol === 'Rb') && (
+                  <div className="application-item">
+                    <div className="application-icon clock"></div>
+                    <span>Relógios Atômicos</span>
+                  </div>
+                )}
+                {(element.symbol === 'Pd' || element.symbol === 'Rh' || element.symbol === 'Ru' || element.symbol === 'Os' || element.symbol === 'Ir') && (
+                  <div className="application-item">
+                    <div className="application-icon catalyst"></div>
+                    <span>Catalisadores</span>
+                  </div>
+                )}
+                {(element.symbol === 'Bi' || element.symbol === 'Te' || element.symbol === 'Sb') && (
+                  <div className="application-item">
+                    <div className="application-icon thermoelectric"></div>
+                    <span>Materiais Termoelétricos</span>
+                  </div>
+                )}
+                {(element.category === 'lantanideo' || element.category === 'actinideo') && (
+                  <div className="application-item">
+                    <div className="application-icon research"></div>
+                    <span>Pesquisa Científica</span>
+                  </div>
+                )}
+                {(element.symbol === 'Ra' || element.symbol === 'Am' || element.symbol === 'Po') && (
+                  <div className="application-item">
+                    <div className="application-icon radioactive"></div>
+                    <span>Aplicações Radioativas</span>
+                  </div>
+                )}
+                {(element.symbol === 'Cd' || element.symbol === 'Se' || element.symbol === 'As') && (
+                  <div className="application-item">
+                    <div className="application-icon semiconductor"></div>
+                    <span>Semicondutores Especiais</span>
+                  </div>
+                )}
+                {(element.symbol === 'Lu' || element.symbol === 'Ho' || element.symbol === 'Er' || element.symbol === 'Tm' || element.symbol === 'Yb') && (
+                  <div className="application-item">
+                    <div className="application-icon laser"></div>
+                    <span>Tecnologia de Lasers</span>
+                  </div>
+                )}
+                {(element.group === 18 && element.symbol !== 'He') && (
+                  <div className="application-item">
+                    <div className="application-icon inert"></div>
+                    <span>Atmosferas Inertes</span>
                   </div>
                 )}
               </div>
