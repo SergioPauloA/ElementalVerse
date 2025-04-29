@@ -188,17 +188,34 @@ const ElementDetails = ({ element, onClose }) => {
   
   // Estado para controlar a aba ativa
   const [activeTab, setActiveTab] = useState('basic');
+  // Estado para controlar qual camada está em foco (para mostrar informações)
+  const [focusedShell, setFocusedShell] = useState(null);
 
   if (!element) return null;
   
-  // Função para obter a animação orbital baseada na configuração eletrônica
-  const getOrbitalAnimation = (config) => {
-    // Remove a notação de gás nobre (e.g., [He]) e divide pelos espaços
-    const shells = config.replace(/\[.*?\]\s*/, '').split(' ');
-    return shells.length;
+  // Função para calcular a distribuição de elétrons nas camadas de Bohr
+  const calculateElectronShells = (atomicNumber) => {
+    // Distribuição máxima de elétrons por camada no modelo de Bohr (2n²)
+    // K=2, L=8, M=18, N=32, O=50, P=72, Q=98
+    const maxElectronsPerShell = [2, 8, 18, 32, 32, 18, 8];
+    
+    // Array para armazenar elétrons em cada camada
+    const shellElectrons = [0, 0, 0, 0, 0, 0, 0];
+    
+    // Distribui elétrons seguindo o modelo de Bohr simplificado
+    let remainingElectrons = atomicNumber;
+    
+    for (let i = 0; i < maxElectronsPerShell.length && remainingElectrons > 0; i++) {
+      shellElectrons[i] = Math.min(remainingElectrons, maxElectronsPerShell[i]);
+      remainingElectrons -= shellElectrons[i];
+    }
+    
+    return shellElectrons.filter(electrons => electrons > 0);
   };
   
-  const orbitalLevels = getOrbitalAnimation(element.electron_configuration);
+  // Obter a distribuição de elétrons para o elemento atual
+  const electronShells = calculateElectronShells(element.number);
+  const shellNames = ['K', 'L', 'M', 'N', 'O', 'P', 'Q'];
   
   return (
     <div className="element-details-overlay">
@@ -239,7 +256,7 @@ const ElementDetails = ({ element, onClose }) => {
               <div className="orbital-animation">
                 {/* Representação visual do núcleo e camadas eletrônicas */}
                 <div className="nucleus"></div>
-                {[...Array(orbitalLevels)].map((_, i) => (
+                {electronShells.map((electrons, i) => (
                   <div 
                     key={i} 
                     className="electron-shell" 
@@ -249,7 +266,21 @@ const ElementDetails = ({ element, onClose }) => {
                       animationDuration: `${3 + i * 2}s`
                     }}
                   >
-                    <div className="electron" />
+                    {/* Para cada camada, mostra o número correto de elétrons */}
+                    {[...Array(Math.min(electrons, 8))].map((_, j) => {
+                      // Distribuir os elétrons uniformemente ao redor da órbita
+                      const angle = (j * 360) / Math.min(electrons, 8);
+                      return (
+                        <div 
+                          key={j} 
+                          className="electron" 
+                          style={{
+                            transform: `rotate(${angle}deg) translateX(${(i+1) * 20}px)`,
+                            animationDelay: `${j * 0.2}s`
+                          }}
+                        />
+                      );
+                    })}
                   </div>
                 ))}
               </div>
@@ -273,34 +304,104 @@ const ElementDetails = ({ element, onClose }) => {
                 <p>{element.electron_configuration}</p>
                 
                 <div className="electron-diagram">
-                  {/* Visualização de Bohr interativa */}
+                  {/* Visualização de Bohr em 3D com melhor interatividade */}
                   <div className="bohr-model">
-                    <div className="nucleus-3d"></div>
-                    {[...Array(orbitalLevels)].map((_, i) => (
-                      <div 
-                        key={i} 
-                        className="orbital-3d" 
-                        style={{ 
-                          width: `${(i+1) * 50}px`, 
-                          height: `${(i+1) * 50}px`,
-                          animationDuration: `${4 + i}s`,
-                          animationDelay: `${i * 0.2}s`
-                        }}
-                      >
-                        {[...Array(i+1)].map((_, j) => (
-                          <div 
-                            key={j} 
-                            className="electron-3d"
-                            style={{
-                              transform: `rotate(${j * (360/(i+1))}deg) translateX(${(i+1) * 25}px)`,
-                              animationDuration: `${2 + i * 0.5}s`,
-                              animationDelay: `${j * 0.1}s`
-                            }}
-                          />
-                        ))}
-                      </div>
-                    ))}
+                    <div className="nucleus-3d">
+                      <span className="atomic-number">{element.number}</span>
+                    </div>
+                    
+                    {/* Exibe legenda das camadas */}
+                    <div className="shell-legend">
+                      {electronShells.map((electrons, i) => (
+                        <div 
+                          key={i}
+                          className={`shell-badge ${focusedShell === i ? 'active' : ''}`}
+                          onClick={() => setFocusedShell(focusedShell === i ? null : i)}
+                        >
+                          {shellNames[i]}: {electrons}e-
+                        </div>
+                      ))}
+                    </div>
+                    
+                    {/* Camadas de elétrons */}
+                    {electronShells.map((electrons, i) => {
+                      const isFocused = focusedShell === i;
+                      return (
+                        <div 
+                          key={i} 
+                          className={`orbital-3d ${isFocused ? 'focused' : ''}`}
+                          style={{ 
+                            width: `${(i+1) * 50}px`, 
+                            height: `${(i+1) * 50}px`,
+                            animationDuration: `${4 + i}s`,
+                            animationDelay: `${i * 0.2}s`,
+                            borderColor: isFocused ? 'rgba(255, 255, 255, 0.6)' : 'rgba(255, 255, 255, 0.15)'
+                          }}
+                          onMouseEnter={() => setFocusedShell(i)}
+                          onMouseLeave={() => setFocusedShell(null)}
+                        >
+                          {/* Elétrons com disposição 3D */}
+                          {[...Array(Math.min(electrons, 12))].map((_, j) => {
+                            // Cálculos para distribuição 3D dos elétrons
+                            const angle = (j * 360) / Math.min(electrons, 12);
+                            // Deslocamento Z para criar efeito 3D
+                            const zOffset = Math.sin(j * 0.5) * 10;
+                            
+                            return (
+                              <div 
+                                key={j} 
+                                className="electron-3d"
+                                style={{
+                                  transform: `rotate(${angle}deg) translateX(${(i+1) * 25}px) translateZ(${zOffset}px)`,
+                                  animationDuration: `${2 + i * 0.5}s`,
+                                  animationDelay: `${j * 0.1}s`
+                                }}
+                              />
+                            );
+                          })}
+                        </div>
+                      );
+                    })}
                   </div>
+                </div>
+                
+                {/* Informação sobre a camada em foco */}
+                {focusedShell !== null && (
+                  <div className="shell-focus-info">
+                    <h4>Camada {shellNames[focusedShell]}</h4>
+                    <p>Elétrons: {electronShells[focusedShell]}</p>
+                    <p>Número quântico principal: {focusedShell + 1}</p>
+                    <p>Capacidade máxima: {[2, 8, 18, 32, 32, 18, 8][focusedShell]}</p>
+                  </div>
+                )}
+                
+                <div className="shell-distribution">
+                  <h4>Distribuição Eletrônica por Camada</h4>
+                  <table className="shell-table">
+                    <thead>
+                      <tr>
+                        <th>Camada</th>
+                        <th>Nome</th>
+                        <th>Elétrons</th>
+                        <th>Máximo</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {electronShells.map((electrons, i) => (
+                        <tr 
+                          key={i}
+                          className={focusedShell === i ? 'highlighted-row' : ''}
+                          onMouseEnter={() => setFocusedShell(i)}
+                          onMouseLeave={() => setFocusedShell(null)}
+                        >
+                          <td>{i+1}</td>
+                          <td>{shellNames[i]}</td>
+                          <td>{electrons}</td>
+                          <td>{[2, 8, 18, 32, 32, 18, 8][i]}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               </div>
             </div>
@@ -1646,6 +1747,125 @@ const App = () => {
         }
 
         /* Estilos para a aba "Estrutura Atômica" */
+
+        /* Número atômico no núcleo */
+        .atomic-number {
+          color: white;
+          font-weight: bold;
+          font-size: 16px;
+          text-shadow: 0 0 4px rgba(0,0,0,0.7);
+        }
+
+        /* Legenda das camadas - substitui a informação diretamente nas órbitas */
+        .shell-legend {
+          position: absolute;
+          top: -40px;
+          left: 50%;
+          transform: translateX(-50%);
+          display: flex;
+          gap: 8px;
+          flex-wrap: wrap;
+          justify-content: center;
+          z-index: 10;
+          width: 100%;
+        }
+
+        .shell-badge {
+          background: rgba(25, 118, 210, 0.7);
+          color: white;
+          padding: 4px 8px;
+          border-radius: 12px;
+          font-size: 12px;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+          text-shadow: 0 1px 1px rgba(0,0,0,0.5);
+        }
+
+        .shell-badge:hover, .shell-badge.active {
+          background: rgba(25, 118, 210, 1);
+          transform: scale(1.1);
+          box-shadow: 0 3px 8px rgba(0,0,0,0.3);
+        }
+
+        /* Estilo para os elétrons na visualização básica */
+        .electron {
+          position: absolute;
+          width: 10px;
+          height: 10px;
+          background-color: #64b5f6;
+          border-radius: 50%;
+          box-shadow: 0 0 12px rgba(100, 181, 246, 1),
+                      0 0 25px rgba(100, 181, 246, 0.6);
+          transform-origin: 0 0;
+          z-index: 3;
+          animation: glow3D 2s infinite;
+        }
+
+        /* Informação da camada eletrônica */
+        .shell-info {
+          position: absolute;
+          font-size: 12px;
+          color: #ffffff;
+          background: rgba(25, 118, 210, 0.7);
+          padding: 3px 6px;
+          border-radius: 10px;
+          right: -10px;
+          top: -5px;
+          z-index: 3;
+          box-shadow: 0 0 5px rgba(0,0,0,0.3);
+          text-shadow: 0 1px 1px rgba(0,0,0,0.5);
+        }
+
+        /* Tabela de distribuição eletrônica */
+        .shell-distribution {
+          margin-top: 30px;
+          padding: 15px;
+          background: rgba(255, 255, 255, 0.03);
+          border-radius: 15px;
+          box-shadow: 0 5px 15px rgba(0,0,0,0.1), 
+                      inset 0 0 0 1px rgba(255,255,255,0.05);
+        }
+
+        .shell-distribution h4 {
+          text-align: center;
+          margin-bottom: 15px;
+          font-size: 18px;
+          color: #e0e0e0;
+        }
+
+        .shell-table {
+          width: 100%;
+          border-collapse: collapse;
+          margin: 10px 0;
+          background: rgba(0, 0, 0, 0.1);
+          border-radius: 8px;
+          overflow: hidden;
+        }
+
+        .shell-table th, 
+        .shell-table td {
+          padding: 10px 12px;
+          text-align: center;
+          border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .shell-table th {
+          background: rgba(25, 118, 210, 0.7);
+          color: white;
+          font-weight: 500;
+        }
+
+        .shell-table tr:nth-child(even) {
+          background: rgba(255, 255, 255, 0.03);
+        }
+
+        /* Animação rotação para elétrons na visualização básica */
+        @keyframes rotateElectron {
+          0% { transform: rotate(0) translateX(calc(100% - 5px)); }
+          100% { transform: rotate(360deg) translateX(calc(100% - 5px)); }
+        }
+
         .atomic-structure {
           display: flex;
           flex-direction: column;
@@ -1669,13 +1889,21 @@ const App = () => {
           max-width: 100%;
         }
 
+        /* Melhor perspectiva 3D para o modelo */
         .bohr-model {
           position: relative;
           width: 340px;
           height: 340px;
-          margin: 0 auto;
+          margin: 60px auto 30px;
           transform-style: preserve-3d;
           perspective: 800px;
+        }
+
+        /* Efeito de expansão quando a camada é destacada */
+        @keyframes expandOrbit {
+          0% { transform: translate(-50%, -50%) rotate3d(1, 1, 0, 60deg) scale(1); }
+          50% { transform: translate(-50%, -50%) rotate3d(1, 1, 0, 60deg) scale(1.05); }
+          100% { transform: translate(-50%, -50%) rotate3d(1, 1, 0, 60deg) scale(1); }
         }
 
         .nucleus-3d {
@@ -1690,6 +1918,9 @@ const App = () => {
           box-shadow: 0 0 30px rgba(244, 67, 54, 0.8);
           z-index: 5;
           animation: pulse3D 3s infinite;
+          display: flex;
+          align-items: center;
+          justify-content: center;
         }
 
         @keyframes pulse3D {
@@ -1707,6 +1938,12 @@ const App = () => {
           transform: translate(-50%, -50%) rotate3d(1, 1, 0, 60deg);
           animation: rotate3d linear infinite;
           box-shadow: 0 0 30px rgba(100, 181, 246, 0.2);
+          transition: all 0.3s ease;
+        }
+
+        .orbital-3d.focused {
+          border: 2px solid rgba(100, 181, 246, 0.8);
+          box-shadow: 0 0 30px rgba(100, 181, 246, 0.6);
         }
 
         .electron-3d {
@@ -1721,12 +1958,31 @@ const App = () => {
                       0 0 25px rgba(100, 181, 246, 0.6);
           animation: glow3D 2s infinite;
           z-index: 4;
+          transform-style: preserve-3d;
+          transition: transform 0.5s ease;
         }
 
         @keyframes glow3D {
           0% { box-shadow: 0 0 12px rgba(100, 181, 246, 1), 0 0 25px rgba(100, 181, 246, 0.6); }
           50% { box-shadow: 0 0 20px rgba(100, 181, 246, 1), 0 0 40px rgba(100, 181, 246, 0.8); }
           100% { box-shadow: 0 0 12px rgba(100, 181, 246, 1), 0 0 25px rgba(100, 181, 246, 0.6); }
+        }
+
+        /* Informações sobre a camada em foco */
+        .shell-focus-info {
+          background: rgba(0, 0, 0, 0.2);
+          border-radius: 15px;
+          padding: 15px;
+          margin: 15px 0;
+          text-align: left;
+          animation: fadeIn 0.3s ease;
+          box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+        }
+
+        .shell-focus-info h4 {
+          margin: 0 0 10px 0;
+          color: #64b5f6;
+          font-size: 16px;
         }
 
         /* Estilos para a aba "Propriedades" com design moderno */
@@ -2138,9 +2394,20 @@ const App = () => {
           letter-spacing: 1px;
         }
 
+        /* Tabela com destaque para a linha selecionada */
+        .shell-table tr.highlighted-row {
+          background: rgba(25, 118, 210, 0.2);
+          transition: background 0.3s ease;
+        }
+
+        .shell-table tr {
+          cursor: pointer;
+          transition: background 0.3s ease;
+        }
+
         /* Animações aprimoradas */
         @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(20px); }
+          from { opacity: 0; transform: translateY(10px); }
           to { opacity: 1; transform: translateY(0); }
         }
 
