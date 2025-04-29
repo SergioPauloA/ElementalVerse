@@ -329,6 +329,23 @@ const ElementDetails = ({ element, onClose }) => {
                                element.category === 'halogenio' ? '85%' :
                                element.category === 'nao-metal' ? '70%' :
                                element.category === 'metal-alcalino-terroso' ? '75%' :
+                               element.category === 'metal-transicao' ? '60%' :
+                               element.category === 'metal-pos-transicao' ? '55%' :
+                               element.category === 'semimetal' ? '50%' :
+                               element.category === 'lantanideo' ? '65%' :
+                               element.category === 'actinideo' ? '70%' :
+                               element.category === 'calcogenio' ? '65%' :
+                               element.category === 'nitrogenoide' ? '75%' :
+                               element.category === 'carbono' ? '60%' :
+                               element.category === 'boro' ? '45%' :
+                               (element.group === 12) ? '50%' :
+                               (element.group === 13 && element.category !== 'semimetal') ? '60%' :
+                               (element.group === 14 && element.category !== 'semimetal' && element.category !== 'nao-metal') ? '55%' :
+                               (element.group === 15 && element.category !== 'semimetal' && element.category !== 'nao-metal') ? '65%' :
+                               (element.group === 16 && element.category !== 'nao-metal') ? '70%' :
+                               (element.group === 17 && element.category !== 'halogenio') ? '80%' :
+                               (element.group === 1 && element.category !== 'metal-alcalino' && element.category !== 'nao-metal') ? '85%' :
+                               (element.atomicNumber >= 104) ? '50%' :
                                '50%'
                       }}
                     ></div>
