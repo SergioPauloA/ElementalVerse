@@ -186,10 +186,11 @@ const Element = ({ element, onClick }) => {
 
 // Componente para exibir detalhes do elemento selecionado
 const ElementDetails = ({ element, onClose }) => {
-  if (!element) return null;
   
   // Estado para controlar a aba ativa
   const [activeTab, setActiveTab] = useState('basic');
+
+  if (!element) return null;
   
   // Função para obter a animação orbital baseada na configuração eletrônica
   const getOrbitalAnimation = (config) => {
@@ -601,6 +602,7 @@ const App = () => {
     );
   };
   
+
   // Componente de busca para elementos
   const SearchBar = () => {
     const [searchTerm, setSearchTerm] = useState('');
@@ -608,18 +610,23 @@ const App = () => {
     const handleSearch = (e) => {
       const value = e.target.value;
       setSearchTerm(value);
-      
-      if (value.trim() === '') return;
-      
-      // Busca por símbolo, nome ou número atômico
-      const found = elementsData.find(
-        el => el.symbol.toLowerCase() === value.toLowerCase() || 
-              el.name.toLowerCase().includes(value.toLowerCase()) ||
-              el.number.toString() === value
-      );
-      
-      if (found) {
-        handleElementClick(found);
+    };
+    
+    const handleKeyDown = (e) => {
+      // Verifica se a tecla pressionada foi Enter
+      if (e.key === 'Enter') {
+        if (searchTerm.trim() === '') return;
+        
+        // Busca por símbolo, nome ou número atômico
+        const found = elementsData.find(
+          el => el.symbol.toLowerCase() === searchTerm.toLowerCase() ||
+                el.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                el.number.toString() === searchTerm
+        );
+        
+        if (found) {
+          handleElementClick(found);
+        }
       }
     };
     
@@ -630,6 +637,7 @@ const App = () => {
           placeholder="Buscar elemento (nome, símbolo ou número)"
           value={searchTerm}
           onChange={handleSearch}
+          onKeyDown={handleKeyDown}
         />
       </div>
     );
@@ -663,20 +671,40 @@ const App = () => {
       </div>
       
       <style jsx>{`
-        /* Estilos gerais */
+        /* Estilos gerais com melhorias */
         * {
           box-sizing: border-box;
           margin: 0;
           padding: 0;
-          font-family: 'Roboto', sans-serif;
+          font-family: 'Poppins', sans-serif; /* Fonte mais moderna */
+          transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); /* Transições suaves em todo o site */
         }
-  
+
         body {
-          background-color: #121212;
+          background: linear-gradient(135deg, #121212 0%, #1a1a2e 100%); /* Gradiente sutil de fundo */
           color: #ffffff;
           line-height: 1.6;
+          overflow-x: hidden; /* Previne scroll horizontal */
+          min-height: 100vh;
+          scrollbar-width: thin;
+          scrollbar-color: #4fc3f7 rgba(255,255,255,0.1);
         }
-  
+
+        body::-webkit-scrollbar {
+          width: 8px;
+        }
+
+        body::-webkit-scrollbar-track {
+          background: rgba(255,255,255,0.1);
+          border-radius: 10px;
+        }
+
+        body::-webkit-scrollbar-thumb {
+          background-color: #4fc3f7;
+          border-radius: 10px;
+          border: 2px solid rgba(255,255,255,0.1);
+        }
+
         .app {
           display: flex;
           flex-direction: column;
@@ -684,62 +712,134 @@ const App = () => {
           padding: 20px;
           max-width: 1600px;
           margin: 0 auto;
+          position: relative;
+          z-index: 1;
         }
-  
+
+        /* Efeito de partículas no fundo */
+        .app::before {
+          content: '';
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background-image: 
+            radial-gradient(circle at 25% 10%, rgba(79, 195, 247, 0.05) 2px, transparent 0),
+            radial-gradient(circle at 75% 30%, rgba(79, 195, 247, 0.05) 2px, transparent 0),
+            radial-gradient(circle at 30% 60%, rgba(79, 195, 247, 0.05) 2px, transparent 0),
+            radial-gradient(circle at 80% 80%, rgba(79, 195, 247, 0.05) 2px, transparent 0);
+          background-size: 350px 350px;
+          background-position: 0 0, 0 0, 0 0, 0 0;
+          z-index: -1;
+          animation: particleShift 60s infinite linear;
+          opacity: 0.6;
+        }
+
+        @keyframes particleShift {
+          0% { background-position: 0% 0%, 0% 0%, 0% 0%, 0% 0%; }
+          100% { background-position: 100% 100%, 100% 100%, 100% 100%, 100% 100%; }
+        }
+
         .app-content {
           display: flex;
           flex-direction: column;
           flex: 1;
           opacity: 1;
-          transition: opacity 1s ease-in-out;
+          transition: opacity 1s cubic-bezier(0.19, 1, 0.22, 1);
+          will-change: opacity; /* Otimização de renderização */
         }
-  
+
         .app-content.hidden {
           opacity: 0;
+          transform: translateY(10px);
         }
-  
+
         .app-header {
           text-align: center;
-          margin-bottom: 30px;
-          animation: fadeIn 1.5s;
+          margin-bottom: 40px;
+          animation: fadeIn 1.5s, floatUp 1.5s;
+          position: relative;
         }
-  
+
         .app-header h1 {
-          font-size: 3rem;
-          margin-bottom: 10px;
-          color: #4fc3f7;
-          text-shadow: 0 0 10px rgba(79, 195, 247, 0.5);
+          font-size: 4rem;
+          margin-bottom: 15px;
+          color: transparent;
+          background: linear-gradient(120deg, #4fc3f7, #03a9f4, #039be5, #81d4fa);
+          background-size: 300% 300%;
+          -webkit-background-clip: text;
+          animation: gradientFlow 8s ease infinite;
+          font-weight: 700;
+          letter-spacing: 1px;
+          text-shadow: 0 5px 15px rgba(3, 169, 244, 0.4);
+          position: relative;
         }
-  
+
+        /* Efeito de glowing lines sob o título */
+        .app-header h1::after {
+          content: '';
+          position: absolute;
+          bottom: -8px;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 180px;
+          height: 3px;
+          background: linear-gradient(90deg, transparent, #4fc3f7, transparent);
+          border-radius: 3px;
+          animation: pulse 3s infinite;
+        }
+
         .app-header p {
-          font-size: 1.2rem;
+          font-size: 1.3rem;
           color: #bbdefb;
+          max-width: 700px;
+          margin: 0 auto;
+          font-weight: 300;
+          animation: fadeIn 2s 0.5s backwards;
+          text-shadow: 0 2px 5px rgba(0,0,0,0.3);
         }
-  
+
         .app-footer {
           text-align: center;
-          margin-top: 40px;
-          padding: 20px;
-          font-size: 0.9rem;
+          margin-top: 60px;
+          padding: 30px 20px;
+          font-size: 1rem;
           color: #90a4ae;
+          position: relative;
+          overflow: hidden;
+          border-top: 1px solid rgba(255,255,255,0.05);
         }
-  
-        /* Estilos da tabela periódica */
+
+        .app-footer::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 1px;
+          background: linear-gradient(90deg, transparent, rgba(79, 195, 247, 0.3), transparent);
+          animation: glowLine 4s infinite;
+        }
+
+        /* Estilos da tabela periódica com melhorias */
         .periodic-table {
           display: flex;
           flex-direction: column;
-          gap: 5px;
+          gap: 6px;
           margin: 30px 0;
           justify-content: center;
-          animation: fadeIn 2s;
+          animation: fadeIn 2s, scaleUp 1.5s cubic-bezier(0.23, 1, 0.32, 1);
+          perspective: 1000px; /* Adiciona profundidade 3D */
         }
-  
+
         .periodic-row {
           display: flex;
-          gap: 5px;
+          gap: 6px;
           justify-content: center;
+          transform-style: preserve-3d;
         }
-  
+
         .element, .element-placeholder {
           width: 70px;
           height: 70px;
@@ -747,301 +847,496 @@ const App = () => {
           flex-direction: column;
           align-items: center;
           justify-content: center;
-          border-radius: 5px;
+          border-radius: 8px;
           position: relative;
           padding: 5px;
-          transition: all 0.3s ease;
+          transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
           cursor: pointer;
+          overflow: hidden;
+          backdrop-filter: blur(5px); /* Efeito de vidro */
+          box-shadow: 0 4px 12px rgba(0,0,0,0.2), 
+                      inset 0 0 0 1px rgba(255,255,255,0.1);
         }
-  
+
         .element-placeholder {
           visibility: hidden;
         }
-  
+
+        .element::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.1), transparent);
+          opacity: 0;
+          transition: opacity 0.5s;
+        }
+
         .element:hover {
-          transform: scale(1.1);
-          box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+          transform: translateY(-5px) scale(1.12);
+          box-shadow: 0 15px 25px rgba(0,0,0,0.3), 
+                      0 0 15px rgba(79, 195, 247, 0.5),
+                      inset 0 0 0 1px rgba(255,255,255,0.2);
           z-index: 2;
         }
-  
-        .element.selected {
-          transform: scale(1.15);
-          box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
-          z-index: 3;
-          animation: pulse 1.5s infinite;
+
+        .element:hover::before {
+          opacity: 1;
         }
-  
+
+        .element.selected {
+          transform: translateY(-8px) scale(1.18);
+          box-shadow: 0 20px 30px rgba(0,0,0,0.4), 
+                      0 0 25px rgba(79, 195, 247, 0.6),
+                      inset 0 0 0 2px rgba(255,255,255,0.3);
+          z-index: 3;
+          animation: elementPulse 2s infinite;
+        }
+
+        @keyframes elementPulse {
+          0% { box-shadow: 0 20px 30px rgba(0,0,0,0.4), 0 0 15px rgba(79, 195, 247, 0.3); }
+          50% { box-shadow: 0 20px 30px rgba(0,0,0,0.4), 0 0 25px rgba(79, 195, 247, 0.8); }
+          100% { box-shadow: 0 20px 30px rgba(0,0,0,0.4), 0 0 15px rgba(79, 195, 247, 0.3); }
+        }
+
         .element-number {
           position: absolute;
-          top: 2px;
-          left: 5px;
+          top: 3px;
+          left: 6px;
           font-size: 0.7rem;
-          font-weight: bold;
+          font-weight: 500;
+          opacity: 0.7;
         }
-  
+
         .element-symbol {
-          font-size: 1.4rem;
-          font-weight: bold;
+          font-size: 1.6rem;
+          font-weight: 700;
           margin-bottom: 2px;
+          text-shadow: 0 2px 5px rgba(0,0,0,0.2);
+          letter-spacing: 1px;
         }
-  
+
         .element-name {
-          font-size: 0.6rem;
+          font-size: 0.65rem;
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
           width: 100%;
           text-align: center;
+          opacity: 0.9;
+          font-weight: 500;
+          transition: opacity 0.3s;
         }
-  
+
+        .element:hover .element-name {
+          opacity: 1;
+        }
+
         .element-mass {
-          font-size: 0.6rem;
+          font-size: 0.62rem;
           color: rgba(0, 0, 0, 0.7);
+          font-weight: 500;
         }
-  
-        /* Categorias de elementos */
-        .metal-alcalino, .metal-alcalino-terroso, .metal-transicao, 
-        .metal-pos-transicao, .semimetal, .nao-metal, 
-        .halogenio, .gas-nobre, .lantanideo, .actinideo {
+
+        /* Categorias de elementos com cores mais vibrantes e gradientes */
+        .metal-alcalino {
+          background: linear-gradient(135deg, #ff9800, #ff5722);
           color: #000;
-          box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
         }
-  
-        /* Legenda das categorias */
+
+        .metal-alcalino-terroso {
+          background: linear-gradient(135deg, #ffc107, #ffeb3b);
+          color: #000;
+        }
+
+        .metal-transicao {
+          background: linear-gradient(135deg, #9c27b0, #673ab7);
+          color: #fff;
+        }
+
+        .metal-pos-transicao {
+          background: linear-gradient(135deg, #8bc34a, #4caf50);
+          color: #000;
+        }
+
+        .semimetal {
+          background: linear-gradient(135deg, #00bcd4, #80deea);
+          color: #000;
+        }
+
+        .nao-metal {
+          background: linear-gradient(135deg, #009688, #26a69a);
+          color: #000;
+        }
+
+        .halogenio {
+          background: linear-gradient(135deg, #03a9f4, #29b6f6);
+          color: #000;
+        }
+
+        .gas-nobre {
+          background: linear-gradient(135deg, #e91e63, #f06292);
+          color: #fff;
+        }
+
+        .lantanideo {
+          background: linear-gradient(135deg, #3f51b5, #7986cb);
+          color: #fff;
+        }
+
+        .actinideo {
+          background: linear-gradient(135deg, #607d8b, #90a4ae);
+          color: #fff;
+        }
+
+        /* Legenda das categorias melhorada */
         .category-legend {
           display: flex;
           flex-wrap: wrap;
           justify-content: center;
-          gap: 10px;
-          margin: 20px 0;
-          padding: 15px;
-          background-color: rgba(255, 255, 255, 0.05);
-          border-radius: 10px;
+          gap: 12px;
+          margin: 30px 0;
+          padding: 25px 20px;
+          background: rgba(255, 255, 255, 0.03);
+          border-radius: 15px;
           animation: fadeIn 1.5s;
+          box-shadow: 0 10px 30px rgba(0,0,0,0.1), 
+                      inset 0 0 0 1px rgba(255,255,255,0.05);
+          backdrop-filter: blur(10px);
+          position: relative;
+          overflow: hidden;
         }
-  
+
+        .category-legend::before {
+          content: '';
+          position: absolute;
+          top: -50%;
+          left: -50%;
+          width: 200%;
+          height: 200%;
+          background: radial-gradient(circle at center, rgba(79, 195, 247, 0.05), transparent 70%);
+          animation: rotateBackground 20s linear infinite;
+        }
+
         .legend-item {
           display: flex;
           align-items: center;
-          margin: 5px 10px;
+          margin: 6px 12px;
+          transition: transform 0.3s;
         }
-  
+
+        .legend-item:hover {
+          transform: translateY(-2px);
+        }
+
         .legend-color {
-          width: 15px;
-          height: 15px;
-          border-radius: 3px;
-          margin-right: 8px;
+          width: 18px;
+          height: 18px;
+          border-radius: 4px;
+          margin-right: 10px;
+          box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
-  
-        /* Filtros */
+
+        /* Filtros com estilo melhorado */
         .filter-controls {
           display: flex;
           flex-wrap: wrap;
           justify-content: center;
-          gap: 10px;
-          margin: 20px 0;
+          gap: 12px;
+          margin: 30px 0;
           animation: fadeIn 1.5s;
+          padding: 10px;
+          position: relative;
         }
-  
+
+        .filter-controls::after {
+          content: '';
+          position: absolute;
+          bottom: -15px;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 50%;
+          height: 1px;
+          background: linear-gradient(90deg, transparent, rgba(79, 195, 247, 0.3), transparent);
+        }
+
         .filter-controls button {
-          background-color: rgba(255, 255, 255, 0.1);
+          background: rgba(255, 255, 255, 0.05);
           color: #ffffff;
           border: none;
-          padding: 8px 15px;
-          border-radius: 20px;
+          padding: 10px 18px;
+          border-radius: 30px;
           cursor: pointer;
-          transition: all 0.3s;
+          transition: all 0.4s;
+          font-weight: 500;
+          font-size: 0.95rem;
+          letter-spacing: 0.5px;
+          box-shadow: 0 4px 10px rgba(0,0,0,0.1), 
+                      inset 0 0 0 1px rgba(255,255,255,0.05);
+          position: relative;
+          overflow: hidden;
         }
-  
+
+        .filter-controls button::before {
+          content: '';
+          position: absolute;
+          top: -50%;
+          left: -50%;
+          width: 200%;
+          height: 200%;
+          background: radial-gradient(circle at center, rgba(255,255,255,0.2), transparent 70%);
+          opacity: 0;
+          transition: opacity 0.5s;
+          transform: scale(0.5);
+        }
+
         .filter-controls button:hover {
-          background-color: rgba(255, 255, 255, 0.2);
+          background: rgba(255, 255, 255, 0.1);
+          transform: translateY(-3px);
+          box-shadow: 0 7px 15px rgba(0,0,0,0.15), 
+                      inset 0 0 0 1px rgba(255,255,255,0.1);
         }
-  
+
+        .filter-controls button:hover::before {
+          opacity: 1;
+          animation: ripple 1s forwards;
+        }
+
         .filter-controls button.active {
-          background-color: #4fc3f7;
-          color: #000;
+          background: linear-gradient(135deg, #03a9f4, #4fc3f7);
+          color: #fff;
+          box-shadow: 0 5px 15px rgba(3, 169, 244, 0.4), 
+                      inset 0 0 0 1px rgba(255,255,255,0.2);
+          text-shadow: 0 1px 3px rgba(0,0,0,0.2);
         }
-  
-        /* Detalhes do elemento */
+
+        @keyframes ripple {
+          to {
+            transform: scale(2);
+            opacity: 0;
+          }
+        }
+
+        /* Detalhes do elemento com design de vidro aprimorado */
         .element-details-overlay {
           position: fixed;
           top: 0;
           left: 0;
           right: 0;
           bottom: 0;
-          background-color: rgba(0, 0, 0, 0.8);
+          background-color: rgba(0, 0, 0, 0.85);
           display: flex;
           justify-content: center;
           align-items: center;
           z-index: 1000;
-          animation: fadeIn 0.3s;
+          animation: fadeIn 0.4s;
+          backdrop-filter: blur(8px);
         }
-  
+
         .element-details {
-          background-color: #1a1a1a;
-          border-radius: 10px;
+          background: rgba(26, 26, 26, 0.8);
+          border-radius: 20px;
           width: 90%;
-          max-width: 800px;
+          max-width: 900px;
           max-height: 90vh;
           overflow-y: auto;
-          border: 2px solid;
-          box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
-          animation: scaleIn 0.5s;
+          border: 1px solid rgba(255,255,255,0.1);
+          box-shadow: 0 25px 50px rgba(0,0,0,0.5), 
+                      0 0 40px rgba(0,0,0,0.3),
+                      inset 0 0 0 1px rgba(255,255,255,0.1);
+          animation: floatIn 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+          backdrop-filter: blur(10px);
+          scrollbar-width: thin;
+          scrollbar-color: #4fc3f7 rgba(255,255,255,0.1);
         }
-  
+
+        .element-details::-webkit-scrollbar {
+          width: 6px;
+        }
+
+        .element-details::-webkit-scrollbar-track {
+          background: rgba(255,255,255,0.05);
+          border-radius: 10px;
+        }
+
+        .element-details::-webkit-scrollbar-thumb {
+          background-color: #4fc3f7;
+          border-radius: 10px;
+        }
+
+        @keyframes floatIn {
+          0% {
+            opacity: 0;
+            transform: translateY(30px) scale(0.9);
+          }
+          100% {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+          }
+        }
+
         .details-header {
           display: flex;
-          padding: 20px;
+          padding: 30px;
           position: relative;
-          border-radius: 8px 8px 0 0;
+          border-radius: 20px 20px 0 0;
+          background: linear-gradient(135deg, rgba(0,0,0,0.4), rgba(0,0,0,0));
         }
-  
+
         .details-symbol {
-          font-size: 4rem;
-          font-weight: bold;
-          margin-right: 20px;
+          font-size: 5rem;
+          font-weight: 700;
+          margin-right: 30px;
           color: #000;
+          text-shadow: 0 2px 10px rgba(255,255,255,0.3);
+          position: relative;
+          z-index: 2;
         }
-  
+
         .details-info {
           color: #000;
+          position: relative;
+          z-index: 2;
         }
-  
+
         .details-info h2 {
-          font-size: 2rem;
-          margin-bottom: 5px;
+          font-size: 2.5rem;
+          margin-bottom: 8px;
+          font-weight: 700;
+          letter-spacing: 0.5px;
         }
-  
+
         .close-button {
           position: absolute;
-          top: 10px;
-          right: 15px;
-          background: none;
+          top: 20px;
+          right: 20px;
+          background: rgba(0,0,0,0.2);
           border: none;
-          font-size: 2rem;
-          color: #000;
+          width: 40px;
+          height: 40px;
+          font-size: 1.5rem;
+          color: #fff;
           cursor: pointer;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: all 0.3s;
+          box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+          z-index: 3;
         }
-  
+
+        .close-button:hover {
+          background: rgba(255,255,255,0.2);
+          transform: rotate(90deg);
+        }
+
         .details-tabs {
           display: flex;
-          border-bottom: 1px solid #333;
+          border-bottom: 1px solid rgba(255,255,255,0.1);
+          position: relative;
+          background: rgba(0,0,0,0.2);
         }
-  
+
+        .details-tabs::after {
+          content: '';
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          width: 100%;
+          height: 1px;
+          background: linear-gradient(90deg, transparent, rgba(79, 195, 247, 0.2), transparent);
+        }
+
         .details-tabs button {
           flex: 1;
-          padding: 12px;
+          padding: 16px;
           background: none;
           border: none;
-          color: #bbb;
+          color: rgba(255,255,255,0.6);
           cursor: pointer;
-          font-size: 1rem;
+          font-size: 1.1rem;
           transition: all 0.3s;
+          position: relative;
+          overflow: hidden;
+          font-weight: 500;
+          letter-spacing: 0.5px;
         }
-  
+
+        .details-tabs button::before {
+          content: '';
+          position: absolute;
+          bottom: 0;
+          left: 50%;
+          width: 0;
+          height: 3px;
+          background: #4fc3f7;
+          transform: translateX(-50%);
+          transition: width 0.3s;
+          border-radius: 3px 3px 0 0;
+        }
+
         .details-tabs button:hover {
+          color: rgba(255,255,255,0.9);
           background-color: rgba(255, 255, 255, 0.05);
         }
-  
+
+        .details-tabs button:hover::before {
+          width: 30%;
+        }
+
         .details-tabs button.active {
           color: #fff;
-          border-bottom: 3px solid #4fc3f7;
+          background: rgba(79, 195, 247, 0.1);
         }
-  
+
+        .details-tabs button.active::before {
+          width: 70%;
+          background: linear-gradient(90deg, #03a9f4, #4fc3f7);
+          box-shadow: 0 0 10px rgba(79, 195, 247, 0.5);
+        }
+
         .details-content {
-          padding: 20px;
+          padding: 30px;
+          position: relative;
+          z-index: 1;
         }
-  
+
+        .details-content::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: radial-gradient(circle at center, rgba(79, 195, 247, 0.05), transparent 70%);
+          z-index: -1;
+        }
+
         /* Estilos para a aba "Básico" */
         .basic-info {
           display: flex;
           flex-wrap: wrap;
-          gap: 30px;
+          gap: 40px;
         }
-  
+
         .orbital-animation {
-          width: 200px;
-          height: 200px;
+          width: 220px;
+          height: 220px;
           position: relative;
           margin: 0 auto;
+          transform-style: preserve-3d;
+          animation: rotateSlowly 20s linear infinite;
         }
-  
+
+        @keyframes rotateSlowly {
+          0% { transform: rotate3d(1, 1, 1, 0deg); }
+          100% { transform: rotate3d(1, 1, 1, 360deg); }
+        }
+
         .nucleus {
-          position: absolute;
-          width: 30px;
-          height: 30px;
-          background-color: #f44336;
-          border-radius: 50%;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%);
-          z-index: 2;
-          box-shadow: 0 0 10px rgba(244, 67, 54, 0.7);
-        }
-  
-        .electron-shell {
-          position: absolute;
-          border: 1px solid rgba(255, 255, 255, 0.3);
-          border-radius: 50%;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%);
-          animation: rotate linear infinite;
-        }
-  
-        .electron {
-          position: absolute;
-          width: 8px;
-          height: 8px;
-          background-color: #64b5f6;
-          border-radius: 50%;
-          top: 0;
-          left: 50%;
-          transform: translateX(-50%);
-          box-shadow: 0 0 5px rgba(100, 181, 246, 0.8);
-        }
-  
-        .basic-text {
-          flex: 1;
-          min-width: 300px;
-        }
-  
-        .basic-text p {
-          margin-bottom: 10px;
-        }
-  
-        .element-description {
-          margin-top: 20px;
-          padding: 10px;
-          background-color: rgba(255, 255, 255, 0.05);
-          border-radius: 5px;
-          line-height: 1.8;
-        }
-  
-        /* Estilos para a aba "Estrutura Atômica" */
-        .atomic-structure {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-        }
-  
-        .electron-config {
-          text-align: center;
-          width: 100%;
-        }
-  
-        .electron-diagram {
-          margin-top: 30px;
-        }
-  
-        .bohr-model {
-          position: relative;
-          width: 300px;
-          height: 300px;
-          margin: 0 auto;
-        }
-  
-        .nucleus-3d {
           position: absolute;
           width: 40px;
           height: 40px;
@@ -1050,186 +1345,509 @@ const App = () => {
           top: 50%;
           left: 50%;
           transform: translate(-50%, -50%);
-          box-shadow: 0 0 15px rgba(244, 67, 54, 0.8);
-          z-index: 5;
+          z-index: 2;
+          box-shadow: 0 0 20px rgba(244, 67, 54, 0.8), 
+                      0 0 40px rgba(244, 67, 54, 0.4);
+          animation: pulsateNucleus 3s infinite;
         }
-  
-        .orbital-3d {
+
+        @keyframes pulsateNucleus {
+          0% { box-shadow: 0 0 20px rgba(244, 67, 54, 0.8), 0 0 40px rgba(244, 67, 54, 0.4); }
+          50% { box-shadow: 0 0 30px rgba(244, 67, 54, 0.9), 0 0 60px rgba(244, 67, 54, 0.6); }
+          100% { box-shadow: 0 0 20px rgba(244, 67, 54, 0.8), 0 0 40px rgba(244, 67, 54, 0.4); }
+        }
+
+        .electron-shell {
           position: absolute;
           border: 1px solid rgba(255, 255, 255, 0.2);
           border-radius: 50%;
           top: 50%;
           left: 50%;
-          transform: translate(-50%, -50%) rotate3d(1, 1, 0, 60deg);
-          animation: rotate3d linear infinite;
+          transform: translate(-50%, -50%);
+          animation: rotate linear infinite;
+          box-shadow: 0 0 20px rgba(100, 181, 246, 0.3);
         }
-  
-        .electron-3d {
+
+        .electron {
           position: absolute;
           width: 10px;
           height: 10px;
           background: radial-gradient(circle at 30% 30%, #64b5f6, #1976d2);
           border-radius: 50%;
           top: 0;
+          left: 50%;
+          transform: translateX(-50%);
+          box-shadow: 0 0 10px rgba(100, 181, 246, 0.8),
+                      0 0 20px rgba(100, 181, 246, 0.4);
+          animation: pulseElectron 2s infinite;
+        }
+
+        @keyframes pulseElectron {
+          0% { box-shadow: 0 0 10px rgba(100, 181, 246, 0.8), 0 0 20px rgba(100, 181, 246, 0.4); }
+          50% { box-shadow: 0 0 15px rgba(100, 181, 246, 1), 0 0 30px rgba(100, 181, 246, 0.7); }
+          100% { box-shadow: 0 0 10px rgba(100, 181, 246, 0.8), 0 0 20px rgba(100, 181, 246, 0.4); }
+        }
+
+        .basic-text {
+          flex: 1;
+          min-width: 320px;
+        }
+
+        .basic-text p {
+          margin-bottom: 15px;
+          line-height: 1.8;
+          color: rgba(255, 255, 255, 0.9);
+          font-size: 1.05rem;
+        }
+
+        .element-description {
+          margin-top: 25px;
+          padding: 20px;
+          background: rgba(255, 255, 255, 0.03);
+          border-radius: 12px;
+          line-height: 1.9;
+          box-shadow: 0 5px 15px rgba(0,0,0,0.1), 
+                      inset 0 0 0 1px rgba(255,255,255,0.05);
+          position: relative;
+          overflow: hidden;
+          transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .element-description:hover {
+          transform: translateY(-5px);
+          box-shadow: 0 10px 25px rgba(0,0,0,0.15), 
+                      inset 0 0 0 1px rgba(255,255,255,0.1);
+        }
+
+        .element-description::before {
+          content: '';
+          position: absolute;
+          top: -100%;
+          left: -100%;
+          width: 300%;
+          height: 300%;
+          background: radial-gradient(circle at center, rgba(79, 195, 247, 0.03), transparent 70%);
+          animation: rotateBackground 30s linear infinite;
+        }
+
+        @keyframes rotateBackground {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+
+        /* Estilos para a aba "Estrutura Atômica" */
+        .atomic-structure {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          padding: 20px 0;
+        }
+
+        .electron-config {
+          text-align: center;
+          width: 100%;
+          padding: 20px;
+          background: rgba(255, 255, 255, 0.03);
+          border-radius: 15px;
+          margin-bottom: 30px;
+          box-shadow: 0 5px 15px rgba(0,0,0,0.1), 
+                      inset 0 0 0 1px rgba(255,255,255,0.05);
+        }
+
+        .electron-diagram {
+          margin: 40px auto;
+          max-width: 100%;
+        }
+
+        .bohr-model {
+          position: relative;
+          width: 340px;
+          height: 340px;
+          margin: 0 auto;
+          transform-style: preserve-3d;
+          perspective: 800px;
+        }
+
+        .nucleus-3d {
+          position: absolute;
+          width: 50px;
+          height: 50px;
+          background: radial-gradient(circle at 30% 30%, #f44336, #b71c1c);
+          border-radius: 50%;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          box-shadow: 0 0 30px rgba(244, 67, 54, 0.8);
+          z-index: 5;
+          animation: pulse3D 3s infinite;
+        }
+
+        @keyframes pulse3D {
+          0% { transform: translate(-50%, -50%) scale(1); }
+          50% { transform: translate(-50%, -50%) scale(1.1); }
+          100% { transform: translate(-50%, -50%) scale(1); }
+        }
+
+        .orbital-3d {
+          position: absolute;
+          border: 1px solid rgba(255, 255, 255, 0.15);
+          border-radius: 50%;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%) rotate3d(1, 1, 0, 60deg);
+          animation: rotate3d linear infinite;
+          box-shadow: 0 0 30px rgba(100, 181, 246, 0.2);
+        }
+
+        .electron-3d {
+          position: absolute;
+          width: 12px;
+          height: 12px;
+          background: radial-gradient(circle at 30% 30%, #64b5f6, #1976d2);
+          border-radius: 50%;
+          top: 0;
           left: 0;
-          box-shadow: 0 0 8px rgba(100, 181, 246, 1);
-          animation: pulse 2s infinite;
+          box-shadow: 0 0 12px rgba(100, 181, 246, 1),
+                      0 0 25px rgba(100, 181, 246, 0.6);
+          animation: glow3D 2s infinite;
           z-index: 4;
         }
-  
-        /* Estilos para a aba "Propriedades" */
+
+        @keyframes glow3D {
+          0% { box-shadow: 0 0 12px rgba(100, 181, 246, 1), 0 0 25px rgba(100, 181, 246, 0.6); }
+          50% { box-shadow: 0 0 20px rgba(100, 181, 246, 1), 0 0 40px rgba(100, 181, 246, 0.8); }
+          100% { box-shadow: 0 0 12px rgba(100, 181, 246, 1), 0 0 25px rgba(100, 181, 246, 0.6); }
+        }
+
+        /* Estilos para a aba "Propriedades" com design moderno */
         .properties-info h3 {
-          margin: 20px 0 10px;
+          margin: 25px 0 15px;
           color: #4fc3f7;
+          font-size: 1.4rem;
+          font-weight: 600;
+          position: relative;
+          padding-left: 15px;
+          letter-spacing: 0.5px;
         }
-  
+
+        .properties-info h3::before {
+          content: '';
+          position: absolute;
+          left: 0;
+          top: 50%;
+          transform: translateY(-50%);
+          width: 5px;
+          height: 22px;
+          background: linear-gradient(to bottom, #03a9f4, #4fc3f7);
+          border-radius: 3px;
+        }
+
         .property-visualization {
-          background-color: rgba(255, 255, 255, 0.05);
-          border-radius: 10px;
-          padding: 15px;
-          margin-bottom: 20px;
+          background: rgba(255, 255, 255, 0.03);
+          border-radius: 15px;
+          padding: 25px;
+          margin-bottom: 30px;
+          box-shadow: 0 10px 20px rgba(0,0,0,0.1), 
+                      inset 0 0 0 1px rgba(255,255,255,0.05);
+          position: relative;
+          overflow: hidden;
+          transition: transform 0.3s;
         }
-  
+
+        .property-visualization:hover {
+          transform: translateY(-5px);
+          box-shadow: 0 15px 30px rgba(0,0,0,0.15), 
+                      inset 0 0 0 1px rgba(255,255,255,0.1);
+        }
+
+        .property-visualization::before {
+          content: '';
+          position: absolute;
+          top: -50%;
+          left: -50%;
+          width: 200%;
+          height: 200%;
+          background: radial-gradient(circle at center, rgba(79, 195, 247, 0.03), transparent 70%);
+          animation: rotateBackground 40s linear infinite;
+          z-index: 0;
+        }
+
         .property {
           display: flex;
           align-items: center;
-          margin-bottom: 15px;
+          margin-bottom: 20px;
+          position: relative;
+          z-index: 1;
         }
-  
+
+        .property:last-child {
+          margin-bottom: 0;
+        }
+
         .property span {
-          width: 120px;
-          font-weight: bold;
+          width: 140px;
+          font-weight: 600;
+          color: rgba(255, 255, 255, 0.9);
+          font-size: 1.05rem;
         }
-  
+
         .state-indicator {
-          padding: 5px 15px;
-          border-radius: 15px;
+          padding: 8px 18px;
+          border-radius: 20px;
           text-align: center;
+          font-weight: 500;
+          min-width: 100px;
+          box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+          transition: transform 0.3s, box-shadow 0.3s;
         }
-  
+
+        .state-indicator:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
         .state-indicator.sólido {
-          background-color: #8d6e63;
+          background: linear-gradient(135deg, #8d6e63, #6d4c41);
+          color: #fff;
         }
-  
+
         .state-indicator.líquido {
-          background-color: #42a5f5;
+          background: linear-gradient(135deg, #42a5f5, #1976d2);
+          color: #fff;
         }
-  
+
         .state-indicator.gasoso {
-          background-color: #81c784;
+          background: linear-gradient(135deg, #81c784, #4caf50);
+          color: #fff;
         }
-  
+
         .reactivity-meter {
-          width: 200px;
-          height: 10px;
-          background-color: #424242;
-          border-radius: 5px;
+          width: 220px;
+          height: 12px;
+          background-color: rgba(255, 255, 255, 0.1);
+          border-radius: 6px;
           overflow: hidden;
+          box-shadow: inset 0 1px 3px rgba(0,0,0,0.3);
+          position: relative;
         }
-  
+
         .reactivity-level {
           height: 100%;
           background: linear-gradient(to right, #4caf50, #ffc107, #f44336);
-          border-radius: 5px;
+          border-radius: 6px;
+          position: relative;
+          transition: width 1s cubic-bezier(0.19, 1, 0.22, 1);
         }
-  
+
+        .reactivity-level::after {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(to bottom, 
+                        rgba(255, 255, 255, 0.3), 
+                        rgba(255, 255, 255, 0) 50%, 
+                        rgba(0, 0, 0, 0.1));
+        }
+
         .abundance-visualization {
           display: flex;
           gap: 5px;
+          align-items: center;
         }
-  
+
         .abundance-unit {
-          width: 20px;
-          height: 20px;
-          background-color: #424242;
-          border-radius: 2px;
-          transition: all 0.3s;
+          width: 22px;
+          height: 22px;
+          background-color: rgba(255, 255, 255, 0.1);
+          border-radius: 3px;
+          transition: all 0.4s;
+          position: relative;
+          overflow: hidden;
         }
-  
+
+        .abundance-unit::after {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          opacity: 0;
+          background: linear-gradient(135deg, rgba(255,255,255,0.2), rgba(255,255,255,0));
+          transition: opacity 0.3s;
+        }
+
+        .abundance-unit:hover::after {
+          opacity: 1;
+        }
+
         .abundance-unit.active {
           background-color: #64b5f6;
-          box-shadow: 0 0 5px rgba(100, 181, 246, 0.5);
+          box-shadow: 0 0 10px rgba(100, 181, 246, 0.6);
+          transform: scale(1.1);
         }
-  
+
         .applications {
           display: flex;
           flex-wrap: wrap;
-          gap: 15px;
+          gap: 20px;
+          margin-top: 25px;
         }
-  
+
         .application-item {
           display: flex;
           align-items: center;
-          background-color: rgba(255, 255, 255, 0.05);
-          padding: 10px;
-          border-radius: 8px;
+          background: rgba(255, 255, 255, 0.03);
+          padding: 15px;
+          border-radius: 12px;
           width: calc(50% - 10px);
+          transition: all 0.4s;
+          box-shadow: 0 5px 15px rgba(0,0,0,0.1),
+                      inset 0 0 0 1px rgba(255,255,255,0.05);
+          position: relative;
+          overflow: hidden;
         }
-  
+
+        .application-item:hover {
+          transform: translateY(-5px);
+          box-shadow: 0 10px 25px rgba(0,0,0,0.15),
+                      inset 0 0 0 1px rgba(255,255,255,0.1);
+        }
+
+        .application-item::before {
+          content: '';
+          position: absolute;
+          top: -50%;
+          left: -50%;
+          width: 200%;
+          height: 200%;
+          background: radial-gradient(circle at center, rgba(255,255,255,0.05), transparent 70%);
+          z-index: 0;
+          opacity: 0;
+          transition: opacity 0.5s;
+        }
+
+        .application-item:hover::before {
+          opacity: 1;
+          animation: rotateBackground 20s linear infinite;
+        }
+
         .application-icon {
-          width: 40px;
-          height: 40px;
-          margin-right: 10px;
-          background-size: cover;
-          background-position: center;
+          width: 50px;
+          height: 50px;
+          margin-right: 15px;
           border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+          position: relative;
+          z-index: 1;
         }
-  
+
+        .application-icon::after {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          border-radius: 50%;
+          background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.3), transparent);
+        }
+
         .application-icon.energy {
-          background-color: #ffa726;
+          background: linear-gradient(135deg, #ffa726, #f57c00);
         }
-  
+
         .application-icon.atmosphere {
-          background-color: #81c784;
+          background: linear-gradient(135deg, #81c784, #388e3c);
         }
-  
+
         .application-icon.industrial {
-          background-color: #90a4ae;
+          background: linear-gradient(135deg, #90a4ae, #546e7a);
         }
-  
+
         .application-icon.electronics {
-          background-color: #64b5f6;
+          background: linear-gradient(135deg, #64b5f6, #1976d2);
         }
-  
+
         .application-icon.jewelry {
-          background-color: #ffd54f;
+          background: linear-gradient(135deg, #ffd54f, #ffb300);
         }
-  
+
         .application-icon.nuclear {
-          background-color: #e57373;
+          background: linear-gradient(135deg, #e57373, #d32f2f);
         }
-  
+
         .application-icon.biological {
-          background-color: #ba68c8;
+          background: linear-gradient(135deg, #ba68c8, #7b1fa2);
         }
-  
-        /* Estilos para o componente de busca */
+
+        /* Estilos para o componente de busca moderno */
         .search-bar {
           display: flex;
           justify-content: center;
-          margin: 20px 0;
+          margin: 30px 0;
           animation: fadeIn 1.5s;
+          position: relative;
         }
-  
+
+        .search-bar::after {
+          content: '';
+          position: absolute;
+          bottom: -15px;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 40%;
+          height: 1px;
+          background: linear-gradient(90deg, transparent, rgba(79, 195, 247, 0.2), transparent);
+        }
+
         .search-bar input {
           width: 100%;
-          max-width: 500px;
-          padding: 12px 20px;
+          max-width: 550px;
+          padding: 16px 25px;
           border-radius: 30px;
           border: none;
-          background-color: rgba(255, 255, 255, 0.1);
+          background: rgba(255, 255, 255, 0.05);
           color: #fff;
-          font-size: 1rem;
-          transition: all 0.3s;
+          font-size: 1.1rem;
+          transition: all 0.4s;
+          box-shadow: 0 5px 15px rgba(0,0,0,0.1),
+                      inset 0 0 0 1px rgba(255,255,255,0.05);
+          letter-spacing: 0.5px;
         }
-  
+
         .search-bar input:focus {
           outline: none;
-          background-color: rgba(255, 255, 255, 0.15);
-          box-shadow: 0 0 10px rgba(79, 195, 247, 0.3);
+          background: rgba(255, 255, 255, 0.1);
+          box-shadow: 0 10px 25px rgba(0,0,0,0.15),
+                      0 0 15px rgba(79, 195, 247, 0.3),
+                      inset 0 0 0 1px rgba(79, 195, 247, 0.3);
+          transform: translateY(-2px);
         }
-  
-        /* Animação introdutória */
+
+        .search-bar::before {
+          content: '🔍';
+          position: absolute;
+          right: calc(50% - 240px);
+          top: 50%;
+          transform: translateY(-50%);
+          color: rgba(255, 255, 255, 0.5);
+          font-size: 1.2rem;
+          pointer-events: none;
+          transition: color 0.3s;
+        }
+
+        .search-bar input:focus + .search-bar::before {
+          color: rgba(79, 195, 247, 0.8);
+        }
+
+        /* Animação introdutória melhorada */
         .intro-animation {
           position: fixed;
           top: 0;
@@ -1240,100 +1858,146 @@ const App = () => {
           flex-direction: column;
           justify-content: center;
           align-items: center;
-          background-color: #121212;
+          background: radial-gradient(circle at center, #1a1a2e, #121212);
           z-index: 9999;
-          animation: fadeOut 1s ease-in-out 2s forwards;
+          animation: fadeOut 1s cubic-bezier(0.19, 1, 0.22, 1) 2.5s forwards;
         }
-  
+
         .atoms-animation {
           position: relative;
-          width: 200px;
-          height: 200px;
-          margin-bottom: 30px;
+          width: 250px;
+          height: 250px;
+          margin-bottom: 40px;
         }
-  
+
         .atom {
           position: absolute;
-          width: 100px;
-          height: 100px;
+          width: 120px;
+          height: 120px;
           border-radius: 50%;
-          opacity: 0.7;
-          animation: float 3s infinite alternate;
+          opacity: 0.8;
+          box-shadow: 0 0 30px;
+          animation: float 3s infinite alternate, glow 4s infinite alternate;
         }
-  
+
         .atom-1 {
-          background-color: #f44336;
+          background: radial-gradient(circle at 30% 30%, #f44336, #b71c1c);
           top: 0;
           left: 50%;
           transform: translateX(-50%);
           animation-delay: 0s;
+          box-shadow: 0 0 30px rgba(244, 67, 54, 0.6);
         }
-  
+
         .atom-2 {
-          background-color: #4fc3f7;
+          background: radial-gradient(circle at 30% 30%, #4fc3f7, #0288d1);
           bottom: 0;
           left: 0;
           animation-delay: 0.5s;
+          box-shadow: 0 0 30px rgba(79, 195, 247, 0.6);
         }
-  
+
         .atom-3 {
-          background-color: #81c784;
+          background: radial-gradient(circle at 30% 30%, #81c784, #388e3c);
           bottom: 0;
           right: 0;
           animation-delay: 1s;
+          box-shadow: 0 0 30px rgba(129, 199, 132, 0.6);
         }
-  
+
         .intro-title {
-          font-size: 4rem;
-          color: #4fc3f7;
-          margin-bottom: 10px;
-          text-shadow: 0 0 20px rgba(79, 195, 247, 0.7);
-          animation: pulse 2s infinite;
+          font-size: 5rem;
+          color: transparent;
+          background: linear-gradient(120deg, #4fc3f7, #03a9f4, #039be5, #81d4fa);
+          background-size: 300% 300%;
+          -webkit-background-clip: text;
+          margin-bottom: 15px;
+          text-shadow: 0 5px 25px rgba(3, 169, 244, 0.5);
+          animation: gradientFlow 8s ease infinite, pulse 2s infinite;
+          letter-spacing: 2px;
+          font-weight: 700;
         }
-  
+
         .intro-subtitle {
-          font-size: 1.5rem;
+          font-size: 1.6rem;
           color: #bbdefb;
+          opacity: 0;
+          animation: fadeIn 1s 0.5s forwards;
+          text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+          font-weight: 300;
+          letter-spacing: 1px;
         }
-  
-        /* Animações */
+
+        /* Animações aprimoradas */
         @keyframes fadeIn {
-          from { opacity: 0; }
-          to { opacity: 1; }
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
         }
-  
+
         @keyframes fadeOut {
-          from { opacity: 1; }
+          from { opacity: 1; visibility: visible; }
           to { opacity: 0; visibility: hidden; }
         }
-  
+
         @keyframes scaleIn {
           from { transform: scale(0.8); opacity: 0; }
           to { transform: scale(1); opacity: 1; }
         }
-  
+
+        @keyframes scaleUp {
+          from { transform: scale(0.95); }
+          to { transform: scale(1); }
+        }
+
         @keyframes rotate {
           from { transform: translate(-50%, -50%) rotate(0deg); }
           to { transform: translate(-50%, -50%) rotate(360deg); }
         }
-  
+
         @keyframes rotate3d {
           from { transform: translate(-50%, -50%) rotate3d(1, 1, 0, 60deg) rotateZ(0deg); }
           to { transform: translate(-50%, -50%) rotate3d(1, 1, 0, 60deg) rotateZ(360deg); }
         }
-  
+
         @keyframes pulse {
           0% { transform: scale(1); }
-          50% { transform: scale(1.05); }
+          50% { transform: scale(1.03); }
           100% { transform: scale(1); }
         }
-  
+
         @keyframes float {
-          from { transform: translateY(0); }
-          to { transform: translateY(-20px); }
+          from { transform: translateY(0) rotate(0deg); }
+          to { transform: translateY(-20px) rotate(5deg); }
         }
-  
-        /* Responsividade */
+
+        @keyframes gradientFlow {
+          0% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+          100% { background-position: 0% 50%; }
+        }
+
+        @keyframes glowLine {
+          0% { transform: translateX(-100%); }
+          100% { transform: translateX(100%); }
+        }
+
+        @keyframes floatUp {
+          from { transform: translateY(30px); }
+          to { transform: translateY(0); }
+        }
+
+        /* Responsividade melhorada */
+        @media (max-width: 1400px) {
+          .app-header h1 {
+            font-size: 3.5rem;
+          }
+          
+          .element, .element-placeholder {
+            width: 65px;
+            height: 65px;
+          }
+        }
+
         @media (max-width: 1200px) {
           .element, .element-placeholder {
             width: 60px;
@@ -1341,14 +2005,22 @@ const App = () => {
           }
           
           .element-symbol {
-            font-size: 1.2rem;
+            font-size: 1.3rem;
           }
           
           .element-name, .element-mass {
-            font-size: 0.55rem;
+            font-size: 0.6rem;
+          }
+          
+          .app-header h1 {
+            font-size: 3.2rem;
+          }
+          
+          .app-header p {
+            font-size: 1.1rem;
           }
         }
-  
+
         @media (max-width: 900px) {
           .element, .element-placeholder {
             width: 50px;
@@ -1356,11 +2028,15 @@ const App = () => {
           }
           
           .element-symbol {
-            font-size: 1rem;
+            font-size: 1.1rem;
           }
           
           .element-name {
             display: none;
+          }
+          
+          .element-number {
+            font-size: 0.65rem;
           }
           
           .element-mass {
@@ -1370,20 +2046,55 @@ const App = () => {
           .application-item {
             width: 100%;
           }
+          
+          .app-header h1 {
+            font-size: 2.8rem;
+          }
+          
+          .app-header p {
+            font-size: 1rem;
+          }
+          
+          .category-legend {
+            flex-direction: column;
+            align-items: center;
+            max-height: 300px;
+            overflow-y: auto;
+            padding: 15px 10px;
+          }
+          
+          .legend-item {
+            margin: 3px 0;
+          }
+          
+          .details-symbol {
+            font-size: 3.5rem;
+          }
+          
+          .details-info h2 {
+            font-size: 2rem;
+          }
         }
-  
+
         @media (max-width: 700px) {
           .element, .element-placeholder {
             width: 40px;
             height: 40px;
+            border-radius: 6px;
           }
           
           .element-symbol {
-            font-size: 0.8rem;
+            font-size: 0.85rem;
           }
           
           .element-mass {
-            font-size: 0.4rem;
+            display: none;
+          }
+          
+          .element-number {
+            font-size: 0.6rem;
+            top: 1px;
+            left: 3px;
           }
           
           .basic-info {
@@ -1392,8 +2103,189 @@ const App = () => {
           }
           
           .orbital-animation {
-            margin-bottom: 20px;
+            margin-bottom: 30px;
           }
+          
+          .app-header h1 {
+            font-size: 2.4rem;
+          }
+          
+          .app-header p {
+            font-size: 0.9rem;
+            padding: 0 15px;
+          }
+          
+          .filter-controls {
+            flex-direction: column;
+            max-width: 250px;
+            margin: 20px auto;
+          }
+          
+          .filter-controls button {
+            width: 100%;
+          }
+          
+          .details-header {
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            padding: 20px 15px;
+          }
+          
+          .details-symbol {
+            margin-right: 0;
+            margin-bottom: 15px;
+          }
+          
+          .details-tabs button {
+            padding: 12px 5px;
+            font-size: 0.9rem;
+          }
+          
+          .bohr-model, .orbital-animation {
+            width: 280px;
+            height: 280px;
+            transform: scale(0.85);
+          }
+          
+          .properties-info h3 {
+            font-size: 1.2rem;
+          }
+          
+          .property span {
+            width: 110px;
+            font-size: 0.9rem;
+          }
+          
+          .reactivity-meter {
+            width: 150px;
+          }
+        }
+
+        @media (max-width: 500px) {
+          .element, .element-placeholder {
+            width: 30px;
+            height: 30px;
+            padding: 2px;
+          }
+          
+          .element-symbol {
+            font-size: 0.7rem;
+          }
+          
+          .element-number {
+            font-size: 0.5rem;
+            top: 1px;
+            left: 2px;
+          }
+          
+          .periodic-row {
+            gap: 3px;
+          }
+          
+          .periodic-table {
+            gap: 3px;
+          }
+          
+          .app-header h1 {
+            font-size: 2rem;
+          }
+          
+          .search-bar input {
+            padding: 12px 20px;
+            font-size: 0.9rem;
+          }
+          
+          .element-details {
+            width: 95%;
+          }
+          
+          .details-content {
+            padding: 15px;
+          }
+          
+          .bohr-model, .orbital-animation {
+            width: 240px;
+            height: 240px;
+            transform: scale(0.7);
+          }
+          
+          .properties-info h3 {
+            font-size: 1.1rem;
+          }
+        }
+
+        /* Novos efeitos para transições de páginas */
+        .page-transition {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: #121212;
+          z-index: 9000;
+          transform: translateY(100%);
+          transition: transform 0.7s cubic-bezier(0.86, 0, 0.07, 1);
+        }
+
+        .page-transition.active {
+          transform: translateY(0%);
+        }
+
+        .page-transition-content {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          width: 80%;
+          text-align: center;
+          opacity: 0;
+          transition: opacity 0.5s ease;
+        }
+
+        .page-transition.active .page-transition-content {
+          opacity: 1;
+        }
+
+        /* Efeitos de hover extras para elementos */
+        .element:hover .element-symbol {
+          transform: translateY(-3px);
+          text-shadow: 0 5px 10px rgba(0,0,0,0.4);
+        }
+
+        .element:hover .element-mass {
+          opacity: 1;
+        }
+
+        /* Efeito de loading spinner para carregamentos assíncronos */
+        .loading-spinner {
+          width: 50px;
+          height: 50px;
+          border: 3px solid rgba(79, 195, 247, 0.2);
+          border-top-color: #4fc3f7;
+          border-radius: 50%;
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          animation: spin 1s linear infinite;
+          z-index: 9999;
+        }
+
+        @keyframes spin {
+          to { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        /* Efeito de destacar um elemento quando selecionado pelo filtro */
+        .element.highlight {
+          animation: highlight 2s;
+          z-index: 5;
+        }
+
+        @keyframes highlight {
+          0% { box-shadow: 0 0 0 3px rgba(79, 195, 247, 0.8); }
+          50% { box-shadow: 0 0 0 8px rgba(79, 195, 247, 0.4); }
+          100% { box-shadow: 0 0 0 3px rgba(79, 195, 247, 0); }
         }
       `}</style>
     </div>
